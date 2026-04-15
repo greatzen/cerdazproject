@@ -62,7 +62,10 @@ app.post('/api/upload-jawaban', upload.single('file'), async (req, res) => {
 
   try {
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: 'cerdaz-uploads'
+        context: {
+            nama: nama,
+            kelas: kelas
+        }
     });
 
     console.log({
