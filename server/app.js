@@ -22,7 +22,7 @@ const upload = multer({ storage });
 
 // ROUTE TEST
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/index.html'));
+  res.send('API is running 🚀');
 });
 
 // ROUTE UPLOAD
