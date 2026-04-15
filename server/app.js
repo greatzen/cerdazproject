@@ -63,7 +63,7 @@ app.post('/api/upload-jawaban', upload.single('file'), async (req, res) => {
   try {
     const cleanNama = nama.replace(/\s+/g, '_');
     const cleanKelas = kelas.replace(/\s+/g, '_');
-    const now = new Date().toISOString().replace(/[:.]/g, '-');
+    const now = new Date().toISOString().split('T')[0];
     const result = await cloudinary.uploader.upload(req.file.path, {
         public_id: `${cleanNama}_${cleanKelas}_${now}`,
         context: {
