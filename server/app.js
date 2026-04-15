@@ -1,8 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
+const uploadPath = path.join(__dirname, 'storage/uploads');
+
+// pastikan folder ada
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 // SERVE FRONTEND (INI PENTING BANGET)
 app.use(express.static(path.join(__dirname, 'client')));
