@@ -31,7 +31,18 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ dest: 'temp/' });
+const upload = multer({
+  dest: 'temp/',
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('FORMAT_FILE_TIDAK_VALID'), false);
+    }
+  }
+});
 
 // ROUTE TEST
 app.get('/', (req, res) => {
