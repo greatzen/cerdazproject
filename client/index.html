@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cerdaZ - Matematika Interaktif</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <script>
+tailwind.config={theme:{extend:{colors:{navy:{900:'#0a0e1a',800:'#0f1629',700:'#151d38',600:'#1b2547',500:'#263156'},orange:{400:'#ff9f43',500:'#ff8c1a',600:'#e67e00'}},fontFamily:{nunito:['Nunito','sans-serif']}}}}
+</script>
+  <style>
+*{font-family:'Nunito',sans-serif;box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+.app-root{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;background:#0a0e1a;color:#e2e8f0}
+.math-bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.math-symbol{position:absolute;color:rgba(255,159,67,0.04);font-size:3rem;font-weight:900}
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,159,67,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,159,67,0.02) 1px,transparent 1px);background-size:60px 60px}
+.page{display:none}.page.active{display:block}
+.card-hover{transition:all .3s cubic-bezier(.4,0,.2,1)}.card-hover:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(255,140,26,0.12)}
+.nav-link{position:relative;transition:color .2s}.nav-link::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;background:#ff8c1a;transition:width .3s}.nav-link:hover::after,.nav-link.active::after{width:100%}.nav-link.active{color:#ff9f43}
+.btn-primary{background:linear-gradient(135deg,#ff8c1a,#ff9f43);color:#0a0e1a;font-weight:700;border-radius:12px;padding:12px 28px;transition:all .3s}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,140,26,0.3)}
+.btn-outline{border:2px solid #ff9f43;color:#ff9f43;font-weight:700;border-radius:12px;padding:10px 24px;transition:all .3s}.btn-outline:hover{background:rgba(255,159,67,0.1)}
+.fade-in{animation:fadeIn .5s ease}@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.progress-step{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all .3s}
+.drop-zone{border:2px dashed rgba(255,159,67,0.3);border-radius:16px;padding:40px;text-align:center;transition:all .3s;cursor:pointer}.drop-zone.dragover{border-color:#ff9f43;background:rgba(255,159,67,0.05)}
+.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:14px 24px;border-radius:12px;font-weight:600;animation:slideIn .4s ease;max-width:360px}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+.shimmer{background:linear-gradient(90deg,transparent,rgba(255,159,67,0.06),transparent);background-size:200% 100%;animation:shimmer 2s infinite}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.float-anim{animation:float 4s ease-in-out infinite}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#0a0e1a}::-webkit-scrollbar-thumb{background:#263156;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#ff9f43}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="app-root" id="appRoot"><!-- Math Background -->
+   <div class="math-bg" aria-hidden="true">
+    <div class="grid-overlay"></div><span class="math-symbol" style="top:8%;left:5%">∑</span> <span class="math-symbol" style="top:15%;right:10%;font-size:4rem">π</span> <span class="math-symbol" style="top:40%;left:8%">∫</span> <span class="math-symbol" style="top:55%;right:5%">∞</span> <span class="math-symbol" style="top:75%;left:15%">Δ</span> <span class="math-symbol" style="top:30%;right:20%">√</span> <span class="math-symbol" style="top:85%;right:15%;font-size:2.5rem">θ</span> <span class="math-symbol" style="top:65%;left:40%">λ</span>
+    <svg style="position:absolute;top:20%;left:55%;opacity:0.03" width="120" height="80" viewbox="0 0 120 80">
+     <polyline points="0,70 20,50 40,60 60,20 80,40 100,10 120,30" fill="none" stroke="#ff9f43" stroke-width="2.5" />
+    </svg>
+    <svg style="position:absolute;bottom:20%;right:30%;opacity:0.03" width="100" height="100" viewbox="0 0 100 100">
+     <circle cx="50" cy="50" r="40" fill="none" stroke="#ff9f43" stroke-width="2" /><line x1="50" y1="10" x2="50" y2="90" stroke="#ff9f43" stroke-width="1" /><line x1="10" y1="50" x2="90" y2="50" stroke="#ff9f43" stroke-width="1" />
+    </svg>
+   </div><!-- Navbar -->
+   <nav class="sticky top-0 z-50 backdrop-blur-xl bg-navy-900/80 border-b border-navy-600/50" role="navigation" aria-label="Main navigation">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+     <div class="flex items-center justify-between h-16"><a href="#home" class="flex items-center gap-2 group" aria-label="Home">
+       <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center font-black text-navy-900 text-sm">
+        ∑
+       </div><span class="font-black text-lg tracking-tight text-white">cerda<span class="text-orange-400">Z</span></span> </a>
+      <div class="hidden md:flex items-center gap-1" id="desktopNav"><a href="#home" class="nav-link px-3 py-2 text-sm font-semibold text-gray-300" data-nav="home">Home</a> <a href="#kelasX" class="nav-link px-3 py-2 text-sm font-semibold text-gray-300" data-nav="kelasX">Kelas X</a> <a href="#kelasXI" class="nav-link px-3 py-2 text-sm font-semibold text-gray-300" data-nav="kelasXI">Kelas XI</a> <a href="#kelasXII" class="nav-link px-3 py-2 text-sm font-semibold text-gray-300" data-nav="kelasXII">Kelas XII</a> <a href="#utbk" class="nav-link px-3 py-2 text-sm font-semibold text-gray-300" data-nav="utbk">UTBK</a>
+      </div><button id="mobileMenuBtn" class="md:hidden text-gray-300 p-2" aria-label="Toggle menu"><i data-lucide="menu" style="width:24px;height:24px"></i></button>
+     </div>
+     <div class="md:hidden hidden pb-4 space-y-1" id="mobileMenu"><a href="#home" class="block px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg hover:bg-navy-700" data-nav="home">Home</a> <a href="#kelasX" class="block px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg hover:bg-navy-700" data-nav="kelasX">Kelas X</a> <a href="#kelasXI" class="block px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg hover:bg-navy-700" data-nav="kelasXI">Kelas XI</a> <a href="#kelasXII" class="block px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg hover:bg-navy-700" data-nav="kelasXII">Kelas XII</a> <a href="#utbk" class="block px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg hover:bg-navy-700" data-nav="utbk">UTBK</a>
+     </div>
+    </div>
+   </nav><!-- Content -->
+   <main class="relative z-10" role="main"><!-- HOME -->
+    <div id="page-home" class="page active">
+     <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-20">
+      <div class="flex flex-col lg:flex-row items-center gap-12">
+       <div class="flex-1 fade-in">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-xs font-bold mb-6"><i data-lucide="sparkles" style="width:14px;height:14px"></i> Platform Matematika Interaktif
+        </div>
+        <h1 id="heroTitle" class="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight mb-6">Belajar Matematika dengan Cara yang Lebih <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">Visual</span> dan <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">Kontekstual</span></h1>
+        <p id="heroDesc" class="text-gray-400 text-lg mb-4 max-w-xl leading-relaxed">Pembelajaran berbasis data nyata, visualisasi interaktif, dan analisis mendalam untuk memahami matematika secara intuitif.</p>
+        <div class="bg-navy-700/50 border border-navy-600/50 rounded-xl p-4 mb-8 max-w-xl">
+         <p class="text-gray-400 text-sm italic" id="quoteText">"Mathematics is not about numbers, equations, computations, or algorithms: it is about understanding."</p>
+         <p class="text-orange-400 text-xs font-bold mt-2" id="quoteAuthor">— William Paul Thurston</p>
+        </div>
+        <div class="flex flex-wrap gap-3"><a href="#pilihKelas" class="btn-primary inline-flex items-center gap-2"><i data-lucide="rocket" style="width:18px;height:18px"></i> Mulai Belajar</a> <a href="#kelasX" class="btn-outline inline-flex items-center gap-2"><i data-lucide="book-open" style="width:18px;height:18px"></i> Lihat Materi</a>
+        </div>
+       </div>
+       <div class="flex-1 hidden lg:flex justify-center float-anim">
+        <div class="relative w-72 h-72">
+         <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-orange-500/20 to-navy-700 border border-orange-500/10"></div>
+         <div class="absolute inset-4 rounded-2xl bg-navy-800 border border-navy-600/50 flex flex-col items-center justify-center gap-3 p-6">
+          <div class="text-5xl font-black text-orange-400">
+           ∑
+          </div>
+          <div class="flex gap-4 text-2xl text-orange-400/60 font-bold">
+           <span>π</span><span>∫</span><span>Δ</span>
+          </div>
+          <svg width="160" height="50" viewbox="0 0 160 50">
+           <path d="M0,40 Q40,5 80,25 T160,10" fill="none" stroke="#ff9f43" stroke-width="2.5" opacity="0.6" /><path d="M0,35 Q40,45 80,15 T160,30" fill="none" stroke="#ff9f43" stroke-width="1.5" opacity="0.3" stroke-dasharray="4,4" />
+          </svg>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section><!-- Features -->
+     <section class="max-w-7xl mx-auto px-4 sm:px-6 pb-24">
+      <div class="text-center mb-12">
+       <h2 class="text-2xl sm:text-3xl font-black text-white mb-3">Kenapa <span class="text-orange-400">cerdaZ</span>?</h2>
+       <p class="text-gray-400 max-w-lg mx-auto">Tiga alasan utama memilih platform ini</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div class="card-hover bg-navy-800/80 border border-navy-600/40 rounded-2xl p-6">
+        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
+         <i data-lucide="bar-chart-3" style="width:24px;height:24px;color:#ff9f43"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-2">Berbasis Data Nyata</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Pelajari statistika dan matematika menggunakan dataset dunia nyata yang relevan dan menarik.</p>
+       </div>
+       <div class="card-hover bg-navy-800/80 border border-navy-600/40 rounded-2xl p-6">
+        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
+         <i data-lucide="eye" style="width:24px;height:24px;color:#ff9f43"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-2">Visualisasi Interaktif</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Grafik dan visualisasi dari Tableau Public untuk memahami konsep secara intuitif.</p>
+       </div>
+       <div class="card-hover bg-navy-800/80 border border-navy-600/40 rounded-2xl p-6">
+        <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center mb-4">
+         <i data-lucide="layers" style="width:24px;height:24px;color:#ff9f43"></i>
+        </div>
+        <h3 class="text-white font-bold text-lg mb-2">Tahapan Terstruktur</h3>
+        <p class="text-gray-400 text-sm leading-relaxed">Stimulus → Konsep → Latihan → Evaluasi. Alur belajar yang sistematis dan bertahap.</p>
+       </div>
+      </div>
+     </section>
+    </div><!-- PILIH KELAS -->
+    <div id="page-pilihKelas" class="page">
+     <section class="max-w-5xl mx-auto px-4 sm:px-6 py-16 fade-in"><a href="#home" class="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 text-sm font-semibold mb-8 transition"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Kembali</a>
+      <h2 class="text-3xl font-black text-white mb-2">Pilih Kelas</h2>
+      <p class="text-gray-400 mb-10">Mulai perjalanan belajar matematikamu</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5" id="kelasCards"><a href="#kelasX" class="card-hover bg-navy-800/80 border border-orange-500/30 rounded-2xl p-6 text-center group">
+        <div class="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-500/20 transition">
+         <span class="text-orange-400 font-black text-xl">X</span>
+        </div><h3 class="text-white font-bold text-lg mb-1">Kelas X</h3><span class="text-xs font-bold text-green-400 bg-green-400/10 px-3 py-1 rounded-full">Tersedia</span> </a> <a href="#underDev" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 text-center opacity-60">
+        <div class="w-14 h-14 rounded-xl bg-navy-700 flex items-center justify-center mx-auto mb-4">
+         <span class="text-gray-400 font-black text-xl">XI</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">Kelas XI</h3><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">Dalam Pengembangan</span> </a> <a href="#underDev" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 text-center opacity-60">
+        <div class="w-14 h-14 rounded-xl bg-navy-700 flex items-center justify-center mx-auto mb-4">
+         <span class="text-gray-400 font-black text-xl">XII</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">Kelas XII</h3><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">Dalam Pengembangan</span> </a> <a href="#underDev" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 text-center opacity-60">
+        <div class="w-14 h-14 rounded-xl bg-navy-700 flex items-center justify-center mx-auto mb-4">
+         <i data-lucide="graduation-cap" style="width:24px;height:24px;color:#9ca3af"></i>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">UTBK</h3><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">Dalam Pengembangan</span> </a>
+      </div>
+     </section>
+    </div><!-- KELAS X -->
+    <div id="page-kelasX" class="page">
+     <section class="max-w-5xl mx-auto px-4 sm:px-6 py-16 fade-in"><a href="#pilihKelas" class="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 text-sm font-semibold mb-8 transition"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Pilih Kelas</a>
+      <h2 class="text-3xl font-black text-white mb-2">Kelas X</h2>
+      <p class="text-gray-400 mb-10">Daftar materi matematika kelas X</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"><a href="#statistika" class="card-hover bg-navy-800/80 border border-orange-500/30 rounded-2xl p-6 group">
+        <div class="flex items-center gap-3 mb-3">
+         <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+          <i data-lucide="bar-chart-3" style="width:20px;height:20px;color:#ff9f43"></i>
+         </div><span class="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">Aktif</span>
+        </div><h3 class="text-white font-bold text-lg mb-1">Statistika</h3><p class="text-gray-400 text-sm">Ukuran pemusatan, penyebaran, letak, dan boxplot</p></a> <a href="#comingSoon" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-3">
+         <div class="w-10 h-10 rounded-lg bg-navy-700 flex items-center justify-center">
+          <i data-lucide="triangle" style="width:20px;height:20px;color:#9ca3af"></i>
+         </div><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">Coming Soon</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">Trigonometri</h3><p class="text-gray-500 text-sm">Sudut, perbandingan, dan identitas trigonometri</p></a> <a href="#comingSoon" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-3">
+         <div class="w-10 h-10 rounded-lg bg-navy-700 flex items-center justify-center">
+          <i data-lucide="git-branch" style="width:20px;height:20px;color:#9ca3af"></i>
+         </div><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">Coming Soon</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">SPLDV</h3><p class="text-gray-500 text-sm">Sistem persamaan linear dua variabel</p></a> <a href="#comingSoon" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-3">
+         <div class="w-10 h-10 rounded-lg bg-navy-700 flex items-center justify-center">
+          <i data-lucide="function-square" style="width:20px;height:20px;color:#9ca3af"></i>
+         </div><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">Coming Soon</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">Fungsi</h3><p class="text-gray-500 text-sm">Fungsi linear, kuadrat, dan komposisi</p></a> <a href="#comingSoon" class="card-hover bg-navy-800/50 border border-navy-600/30 rounded-2xl p-6 opacity-60">
+        <div class="flex items-center gap-3 mb-3">
+         <div class="w-10 h-10 rounded-lg bg-navy-700 flex items-center justify-center">
+          <i data-lucide="infinity" style="width:20px;height:20px;color:#9ca3af"></i>
+         </div><span class="text-xs font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">Coming Soon</span>
+        </div><h3 class="text-gray-300 font-bold text-lg mb-1">Limit</h3><p class="text-gray-500 text-sm">Limit fungsi aljabar dan trigonometri</p></a>
+      </div>
+     </section>
+    </div><!-- STATISTIKA -->
+    <div id="page-statistika" class="page">
+     <section class="max-w-5xl mx-auto px-4 sm:px-6 py-16 fade-in"><a href="#kelasX" class="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 text-sm font-semibold mb-8 transition"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Kelas X</a>
+      <h2 class="text-3xl font-black text-white mb-2">Statistika</h2>
+      <p class="text-gray-400 mb-10">Pilih topik untuk mulai belajar</p>
+      <div class="grid sm:grid-cols-2 gap-5" id="topikGrid"></div>
+     </section>
+    </div><!-- TOPIK DETAIL -->
+    <div id="page-topikDetail" class="page">
+     <section class="max-w-4xl mx-auto px-4 sm:px-6 py-16 fade-in"><a href="#statistika" class="inline-flex items-center gap-2 text-gray-400 hover:text-orange-400 text-sm font-semibold mb-6 transition" id="backToStatistika"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Statistika</a>
+      <h2 class="text-2xl font-black text-white mb-1" id="topikTitle"></h2>
+      <p class="text-gray-400 text-sm mb-8" id="topikDesc"></p><!-- Progress Steps -->
+      <div class="flex items-center gap-2 mb-8 flex-wrap" id="progressSteps"></div><!-- Content Area -->
+      <div id="stepContent" class="bg-navy-800/80 border border-navy-600/40 rounded-2xl p-6 sm:p-8 mb-6"></div><!-- Navigation Buttons -->
+      <div class="flex flex-wrap gap-3 justify-between" id="stepNav"></div>
+     </section>
+    </div><!-- UNDER DEVELOPMENT -->
+    <div id="page-underDev" class="page">
+     <section class="max-w-3xl mx-auto px-4 sm:px-6 py-24 text-center fade-in">
+      <div class="w-20 h-20 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto mb-6">
+       <i data-lucide="construction" style="width:40px;height:40px;color:#eab308"></i>
+      </div>
+      <h2 class="text-2xl font-black text-white mb-3">Fitur Sedang Dalam Pengembangan</h2>
+      <p class="text-gray-400 mb-8 max-w-md mx-auto">Kami sedang mempersiapkan konten terbaik untukmu. Nantikan update selanjutnya!</p><a href="#home" class="btn-primary inline-flex items-center gap-2"><i data-lucide="home" style="width:18px;height:18px"></i> Kembali ke Home</a>
+     </section>
+    </div><!-- COMING SOON (materi) -->
+    <div id="page-comingSoon" class="page">
+     <section class="max-w-3xl mx-auto px-4 sm:px-6 py-24 text-center fade-in">
+      <div class="w-20 h-20 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-6">
+       <i data-lucide="clock" style="width:40px;height:40px;color:#ff9f43"></i>
+      </div>
+      <h2 class="text-2xl font-black text-white mb-3">Coming Soon</h2>
+      <p class="text-gray-400 mb-8 max-w-md mx-auto">Materi ini sedang disiapkan. Pantau terus perkembangannya!</p><a href="#kelasX" class="btn-primary inline-flex items-center gap-2"><i data-lucide="arrow-left" style="width:18px;height:18px"></i> Kembali ke Kelas X</a>
+     </section>
+    </div>
+   </main><!-- Footer -->
+   <footer class="relative z-10 border-t border-navy-600/40 mt-16" role="contentinfo">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+     <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div>
+       <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center font-black text-navy-900 text-xs">
+         ∑
+        </div><span class="font-black text-lg text-white">cerda<span class="text-orange-400">Z</span></span>
+       </div>
+       <p class="text-gray-400 text-sm leading-relaxed">Platform pembelajaran matematika interaktif berbasis data nyata dan visualisasi.</p>
+      </div>
+      <div>
+       <h4 class="text-white font-bold mb-4">Navigasi</h4>
+       <div class="space-y-2">
+        <a href="#home" class="block text-gray-400 text-sm hover:text-orange-400 transition">Home</a><a href="#kelasX" class="block text-gray-400 text-sm hover:text-orange-400 transition">Kelas X</a><a href="#pilihKelas" class="block text-gray-400 text-sm hover:text-orange-400 transition">Pilih Kelas</a>
+       </div>
+      </div>
+      <div>
+       <h4 class="text-white font-bold mb-4">Materi</h4>
+       <div class="space-y-2">
+        <a href="#statistika" class="block text-gray-400 text-sm hover:text-orange-400 transition">Statistika</a><a href="#comingSoon" class="block text-gray-400 text-sm hover:text-orange-400 transition">Trigonometri</a><a href="#comingSoon" class="block text-gray-400 text-sm hover:text-orange-400 transition">SPLDV</a>
+       </div>
+      </div>
+      <div>
+       <h4 class="text-white font-bold mb-4">Kontak</h4>
+       <div class="space-y-2"><a href="mailto:contact@cerdaz.id" class="flex items-center gap-2 text-gray-400 text-sm hover:text-orange-400 transition"><i data-lucide="mail" style="width:14px;height:14px"></i> contact@cerdaz.id</a> <a href="#" class="flex items-center gap-2 text-gray-400 text-sm hover:text-orange-400 transition" target="_blank" rel="noopener noreferrer"><i data-lucide="instagram" style="width:14px;height:14px"></i> @cerdazmath</a> <a href="#" class="flex items-center gap-2 text-gray-400 text-sm hover:text-orange-400 transition" target="_blank" rel="noopener noreferrer"><i data-lucide="youtube" style="width:14px;height:14px"></i> cerdaZ Math</a>
+       </div>
+      </div>
+     </div>
+     <div class="border-t border-navy-600/40 mt-8 pt-8 text-center">
+      <p class="text-gray-500 text-sm" id="footerCredit">cerdaZProject By Uzen Fauzi</p>
+     </div>
+    </div>
+   </footer><!-- Toast Container -->
+   <div id="toastContainer"></div>
+  </div>
+  <script>
+// ===== DATA =====
+const TOPICS = [
+  {id:'pemusatan',title:'Ukuran Pemusatan',desc:'Mean, median, dan modus dari data tunggal maupun berkelompok',icon:'target'},
+  {id:'penyebaran',title:'Ukuran Penyebaran',desc:'Range, varians, simpangan baku, dan koefisien variasi',icon:'move-horizontal'},
+  {id:'letak',title:'Ukuran Letak',desc:'Kuartil, desil, dan persentil',icon:'git-commit'},
+  {id:'boxplot',title:'Boxplot',desc:'Diagram kotak-garis dan analisis outlier',icon:'box'}
+];
+const STEPS = ['Stimulus','Konsep','Latihan','Evaluasi'];
+const QUOTES = [
+  {t:'"Mathematics is not about numbers, equations, computations, or algorithms: it is about understanding."',a:'— William Paul Thurston'},
+  {t:'"Pure mathematics is, in its way, the poetry of logical ideas."',a:'— Albert Einstein'},
+  {t:'"The essence of mathematics lies in its freedom."',a:'— Georg Cantor'},
+  {t:'"Mathematics is the queen of the sciences."',a:'— Carl Friedrich Gauss'},
+  {t:'"Do not worry about your difficulties in mathematics. I can assure you mine are still greater."',a:'— Albert Einstein'}
+];
+
+let currentTopic = null;
+let currentStep = 0;
+
+// ===== QUOTES ROTATION =====
+function rotateQuote(){
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  const qt=document.getElementById('quoteText');
+  const qa=document.getElementById('quoteAuthor');
+  if(qt)qt.textContent=q.t;
+  if(qa)qa.textContent=q.a;
+}
+setInterval(rotateQuote,8000);
+
+// ===== TOAST =====
+function showToast(msg,type='info'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  const bg=type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-navy-700 border border-navy-600';
+  t.className=`toast ${bg} text-white text-sm`;
+  t.textContent=msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000);
+}
+
+// ===== ROUTER =====
+function navigate(){
+  const hash=location.hash.slice(1)||'home';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+
+  // Map nav highlights
+  const navMap={home:'home',pilihKelas:'home',kelasX:'kelasX',kelasXI:'kelasXI',kelasXII:'kelasXII',utbk:'utbk',statistika:'kelasX',topikDetail:'kelasX',comingSoon:'kelasX',underDev:'home'};
+  const activeNav=navMap[hash]||'home';
+  document.querySelectorAll(`[data-nav="${activeNav}"]`).forEach(n=>n.classList.add('active'));
+
+  // Redirect unavailable pages
+  if(['kelasXI','kelasXII','utbk'].includes(hash)){
+    document.getElementById('page-underDev').classList.add('active');
+    document.getElementById('appRoot').scrollTo(0,0);
+    lucide.createIcons();
+    return;
+  }
+
+  const page=document.getElementById('page-'+hash);
+  if(page){
+    page.classList.add('active');
+    if(hash==='statistika') renderTopics();
+  } else {
+    document.getElementById('page-home').classList.add('active');
+  }
+  document.getElementById('appRoot').scrollTo(0,0);
+  lucide.createIcons();
+  // Close mobile menu
+  document.getElementById('mobileMenu').classList.add('hidden');
+}
+
+// ===== TOPICS =====
+function renderTopics(){
+  const g=document.getElementById('topikGrid');
+  g.innerHTML=TOPICS.map(t=>`
+    <a href="#topikDetail" onclick="openTopic('${t.id}')" class="card-hover bg-navy-800/80 border border-orange-500/30 rounded-2xl p-6 group">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center"><i data-lucide="${t.icon}" style="width:20px;height:20px;color:#ff9f43"></i></div>
+      </div>
+      <h3 class="text-white font-bold text-lg mb-1">${t.title}</h3>
+      <p class="text-gray-400 text-sm">${t.desc}</p>
+      <div class="mt-3 text-orange-400 text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">Mulai Belajar <i data-lucide="arrow-right" style="width:14px;height:14px"></i></div>
+    </a>
+  `).join('');
+  lucide.createIcons();
+}
+
+function openTopic(id){
+  currentTopic=TOPICS.find(t=>t.id===id);
+  currentStep=0;
+  renderTopicDetail();
+}
+
+function renderTopicDetail(){
+  if(!currentTopic)return;
+  document.getElementById('topikTitle').textContent=currentTopic.title;
+  document.getElementById('topikDesc').textContent=currentTopic.desc;
+  renderProgressSteps();
+  renderStepContent();
+  renderStepNav();
+  lucide.createIcons();
+}
+
+function renderProgressSteps(){
+  const c=document.getElementById('progressSteps');
+  c.innerHTML=STEPS.map((s,i)=>{
+    const done=i<currentStep,active=i===currentStep;
+    const bg=done?'bg-green-500 text-white':active?'bg-orange-500 text-navy-900':'bg-navy-700 text-gray-400';
+    const line=i<STEPS.length-1?`<div class="w-8 h-0.5 ${i<currentStep?'bg-green-500':'bg-navy-600'}"></div>`:'';
+    return `<div class="flex items-center gap-2"><div class="progress-step ${bg}">${done?'✓':i+1}</div><span class="text-xs font-semibold ${active?'text-orange-400':'text-gray-500'} hidden sm:inline">${s}</span>${line}</div>`;
+  }).join('');
+}
+
+function renderStepContent(){
+  const c=document.getElementById('stepContent');
+  const step=STEPS[currentStep];
+  const tid=currentTopic.id;
+
+  if(step==='Stimulus'){
+    c.innerHTML=`
+      <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="zap" style="width:20px;height:20px;color:#ff9f43"></i> Stimulus</h3>
+      <p class="text-gray-400 mb-6">Amati visualisasi data berikut dan temukan pola yang menarik.</p>
+      <div class="bg-navy-700/50 border border-navy-600/40 rounded-xl p-8 text-center mb-6">
+        <!-- Tableau Public Embed Placeholder -->
+        <div class="text-gray-500 text-sm"><i data-lucide="bar-chart-3" style="width:48px;height:48px;color:#263156;display:inline-block;margin-bottom:8px"></i><br>Area embed visualisasi Tableau Public<br><span class="text-xs text-gray-600">Tambahkan embed code dari Tableau Public di sini</span></div>
+      </div>
+      <button onclick="downloadDataset('${tid}')" class="btn-outline inline-flex items-center gap-2 text-sm"><i data-lucide="download" style="width:16px;height:16px"></i> Unduh Dataset</button>
+    `;
+  } else if(step==='Konsep'){
+    const concepts={
+      pemusatan:'<p class="text-gray-300 leading-relaxed mb-4"><strong class="text-white">Mean (Rata-rata)</strong> adalah jumlah seluruh data dibagi banyak data. <strong class="text-white">Median</strong> adalah nilai tengah, dan <strong class="text-white">Modus</strong> adalah nilai yang paling sering muncul.</p><div class="bg-navy-700/60 rounded-xl p-4 font-mono text-orange-400 text-sm mb-4">x̄ = (Σxᵢ) / n</div><p class="text-gray-400 text-sm">Cobalah hitung mean, median, dan modus dari dataset yang telah kamu unduh.</p>',
+      penyebaran:'<p class="text-gray-300 leading-relaxed mb-4"><strong class="text-white">Range</strong> = Nilai max − Nilai min. <strong class="text-white">Varians</strong> mengukur rata-rata kuadrat simpangan. <strong class="text-white">Simpangan Baku</strong> adalah akar dari varians.</p><div class="bg-navy-700/60 rounded-xl p-4 font-mono text-orange-400 text-sm mb-4">σ² = Σ(xᵢ - x̄)² / n</div>',
+      letak:'<p class="text-gray-300 leading-relaxed mb-4"><strong class="text-white">Kuartil</strong> membagi data menjadi 4 bagian sama besar. <strong class="text-white">Q1</strong> (25%), <strong class="text-white">Q2</strong> (50%, sama dengan median), <strong class="text-white">Q3</strong> (75%).</p><div class="bg-navy-700/60 rounded-xl p-4 font-mono text-orange-400 text-sm mb-4">Qᵢ = data ke-(i(n+1)/4)</div>',
+      boxplot:'<p class="text-gray-300 leading-relaxed mb-4"><strong class="text-white">Boxplot</strong> menampilkan Q1, Q2 (median), Q3, serta whiskers dan outlier. <strong class="text-white">IQR</strong> = Q3 − Q1.</p><div class="bg-navy-700/60 rounded-xl p-4 font-mono text-orange-400 text-sm mb-4">Outlier: x &lt; Q1 − 1.5·IQR atau x &gt; Q3 + 1.5·IQR</div>'
+    };
+    c.innerHTML=`
+      <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="book-open" style="width:20px;height:20px;color:#ff9f43"></i> Konsep</h3>
+      ${concepts[tid]||'<p class="text-gray-400">Konsep materi akan ditampilkan di sini.</p>'}
+    `;
+  } else if(step==='Latihan'){
+    c.innerHTML=`
+      <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="pencil" style="width:20px;height:20px;color:#ff9f43"></i> Latihan</h3>
+      <p class="text-gray-400 mb-6">Kerjakan latihan berikut lalu upload jawabanmu.</p>
+      <div class="bg-navy-700/50 border border-navy-600/40 rounded-xl p-5 mb-6">
+        <p class="text-gray-300 text-sm mb-2 font-semibold">Soal Latihan:</p>
+        <p class="text-gray-400 text-sm">Gunakan dataset yang telah kamu unduh, lalu hitung dan analisis sesuai konsep yang telah dipelajari. Tuliskan proses pengerjaanmu.</p>
+      </div>
+      ${renderUploadForm('latihan')}
+    `;
+    initDropZone('latihan');
+  } else if(step==='Evaluasi'){
+    c.innerHTML=`
+      <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i data-lucide="clipboard-check" style="width:20px;height:20px;color:#ff9f43"></i> Evaluasi</h3>
+      <p class="text-gray-400 mb-6">Kerjakan soal evaluasi secara mandiri dan upload hasilnya.</p>
+      <div class="bg-navy-700/50 border border-navy-600/40 rounded-xl p-5 mb-6">
+        <p class="text-gray-300 text-sm mb-2 font-semibold">Soal Evaluasi:</p>
+        <p class="text-gray-400 text-sm">Analisis dataset secara komprehensif mencakup seluruh konsep ${currentTopic.title}. Sajikan dalam bentuk laporan singkat.</p>
+      </div>
+      ${renderUploadForm('evaluasi')}
+    `;
+    initDropZone('evaluasi');
+  }
+  lucide.createIcons();
+}
+
+function renderUploadForm(type){
+  return `
+    <form id="form-${type}" class="space-y-4" onsubmit="handleUpload(event,'${type}')">
+      <div>
+        <label for="${type}-nama" class="block text-sm font-semibold text-gray-300 mb-1">Nama</label>
+        <input type="text" id="${type}-nama" required class="w-full bg-navy-700 border border-navy-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-orange-500 transition" placeholder="Masukkan nama lengkap">
+      </div>
+      <div>
+        <label for="${type}-kelas" class="block text-sm font-semibold text-gray-300 mb-1">Kelas</label>
+        <input type="text" id="${type}-kelas" required class="w-full bg-navy-700 border border-navy-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-orange-500 transition" placeholder="Contoh: X IPA 1">
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-300 mb-1">Upload Jawaban</label>
+        <div class="drop-zone" id="dropzone-${type}" role="button" tabindex="0" aria-label="Upload area, click or drag file here">
+          <i data-lucide="upload-cloud" style="width:36px;height:36px;color:#ff9f43;margin:0 auto 8px;display:block"></i>
+          <p class="text-gray-400 text-sm mb-1">Drag & drop file di sini</p>
+          <p class="text-gray-500 text-xs">atau klik untuk memilih file</p>
+          <input type="file" name="file" class="hidden" id="file-${type}" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx">
+          <p class="text-orange-400 text-xs mt-2 font-semibold hidden" id="filename-${type}"></p>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary w-full text-center flex items-center justify-center gap-2" id="submitBtn-${type}">
+        <i data-lucide="send" style="width:16px;height:16px"></i> Kirim Jawaban
+      </button>
+    </form>
+  `;
+}
+
+function initDropZone(type){
+  setTimeout(()=>{
+    const dz=document.getElementById('dropzone-'+type);
+    const fi=document.getElementById('file-'+type);
+    const fn=document.getElementById('filename-'+type);
+    if(!dz||!fi)return;
+    dz.addEventListener('click',()=>fi.click());
+    dz.addEventListener('keydown',e=>{if(e.key==='Enter')fi.click()});
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover')});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+    dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');if(e.dataTransfer.files.length){fi.files=e.dataTransfer.files;fn.textContent=e.dataTransfer.files[0].name;fn.classList.remove('hidden')}});
+    fi.addEventListener('change',()=>{if(fi.files.length){fn.textContent=fi.files[0].name;fn.classList.remove('hidden')}});
+  },100);
+}
+
+function handleUpload(e,type){
+  e.preventDefault();
+  const nama=document.getElementById(type+'-nama').value;
+  const kelas=document.getElementById(type+'-kelas').value;
+  const file=document.getElementById('file-'+type).files[0];
+  if(!file){showToast('Silakan pilih file terlebih dahulu','error');return}
+
+  const btn=document.getElementById('submitBtn-'+type);
+  btn.disabled=true;
+  btn.innerHTML='<span class="inline-block w-4 h-4 border-2 border-navy-900 border-t-transparent rounded-full animate-spin"></span> Mengirim...';
+
+  const formData=new FormData();
+  formData.append('nama',nama);
+  formData.append('kelas',kelas);
+  formData.append('file',file);
+  formData.append('topik',currentTopic?currentTopic.id:'');
+  formData.append('tipe',type);
+
+  fetch('/api/upload-jawaban',{method:'POST',body:formData})
+    .then(r=>{if(!r.ok)throw new Error('Upload gagal');return r.json()})
+    .then(()=>{showToast('Jawaban berhasil dikirim!','success');e.target.reset();document.getElementById('filename-'+type).classList.add('hidden')})
+    .catch(()=>showToast('Server belum tersedia. Jawaban akan dikirim saat backend aktif.','error'))
+    .finally(()=>{btn.disabled=false;btn.innerHTML='<i data-lucide="send" style="width:16px;height:16px"></i> Kirim Jawaban';lucide.createIcons()});
+}
+
+function downloadDataset(topicId){
+  showToast('Mengunduh dataset...','info');
+  fetch(`/api/dataset/${topicId}`)
+    .then(r=>{if(!r.ok)throw new Error();return r.blob()})
+    .then(b=>{const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=`dataset-${topicId}.xlsx`;a.click();URL.revokeObjectURL(u);showToast('Dataset berhasil diunduh!','success')})
+    .catch(()=>showToast('Server belum tersedia. Dataset akan tersedia saat backend aktif.','error'));
+}
+
+function renderStepNav(){
+  const c=document.getElementById('stepNav');
+  const isFirst=currentStep===0,isLast=currentStep===STEPS.length-1;
+  let html='';
+  if(!isFirst) html+=`<button onclick="prevStep()" class="btn-outline text-sm flex items-center gap-2"><i data-lucide="arrow-left" style="width:16px;height:16px"></i> Kembali</button>`;
+  else html+='<div></div>';
+  if(isLast) html+=`<button onclick="finishTopic()" class="btn-primary text-sm flex items-center gap-2">Selesaikan Topik <i data-lucide="check-circle" style="width:16px;height:16px"></i></button>`;
+  else html+=`<button onclick="nextStep()" class="btn-primary text-sm flex items-center gap-2">Lanjut Belajar <i data-lucide="arrow-right" style="width:16px;height:16px"></i></button>`;
+  c.innerHTML=html;
+  lucide.createIcons();
+}
+
+function nextStep(){if(currentStep<STEPS.length-1){currentStep++;renderTopicDetail()}}
+function prevStep(){if(currentStep>0){currentStep--;renderTopicDetail()}}
+function finishTopic(){
+  showToast(`Topik "${currentTopic.title}" selesai! 🎉`,'success');
+  location.hash='statistika';
+}
+
+// ===== MOBILE MENU =====
+document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
+  document.getElementById('mobileMenu').classList.toggle('hidden');
+});
+
+// ===== INIT =====
+window.addEventListener('hashchange',navigate);
+navigate();
+rotateQuote();
+lucide.createIcons();
+
+// ===== ELEMENT SDK =====
+const defaultConfig={
+  hero_title:'Belajar Matematika dengan Cara yang Lebih Visual dan Kontekstual',
+  hero_description:'Pembelajaran berbasis data nyata, visualisasi interaktif, dan analisis mendalam untuk memahami matematika secara intuitif.',
+  footer_text:'cerdaZProject By Uzen Fauzi',
+  background_color:'#0a0e1a',
+  surface_color:'#0f1629',
+  text_color:'#e2e8f0',
+  accent_color:'#ff9f43',
+  secondary_action_color:'#263156',
+  font_family:'Nunito',
+  font_size:16
+};
+
+function applyConfig(cfg){
+  const c={...defaultConfig,...cfg};
+  // Text
+  const ht=document.getElementById('heroTitle');
+  if(ht){ht.innerHTML=c.hero_title.replace(/Visual/,'<span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">Visual</span>').replace(/Kontekstual/,'<span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-orange-500">Kontekstual</span>')}
+  const hd=document.getElementById('heroDesc');if(hd)hd.textContent=c.hero_description;
+  const fc=document.getElementById('footerCredit');if(fc)fc.textContent=c.footer_text;
+  // Colors
+  document.documentElement.style.setProperty('--bg',c.background_color);
+  document.querySelector('.app-root').style.background=c.background_color;
+  document.body.style.background=c.background_color;
+  document.querySelector('.app-root').style.color=c.text_color;
+  // Font
+  const ff=c.font_family+', Nunito, sans-serif';
+  document.querySelector('.app-root').style.fontFamily=ff;
+  const bs=c.font_size;
+  document.querySelector('.app-root').style.fontSize=bs+'px';
+}
+
+if(window.elementSdk){
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange:async(cfg)=>applyConfig(cfg),
+    mapToCapabilities:(cfg)=>({
+      recolorables:[
+        {get:()=>cfg.background_color||defaultConfig.background_color,set:v=>{cfg.background_color=v;window.elementSdk.setConfig({background_color:v})}},
+        {get:()=>cfg.surface_color||defaultConfig.surface_color,set:v=>{cfg.surface_color=v;window.elementSdk.setConfig({surface_color:v})}},
+        {get:()=>cfg.text_color||defaultConfig.text_color,set:v=>{cfg.text_color=v;window.elementSdk.setConfig({text_color:v})}},
+        {get:()=>cfg.accent_color||defaultConfig.accent_color,set:v=>{cfg.accent_color=v;window.elementSdk.setConfig({accent_color:v})}},
+        {get:()=>cfg.secondary_action_color||defaultConfig.secondary_action_color,set:v=>{cfg.secondary_action_color=v;window.elementSdk.setConfig({secondary_action_color:v})}}
+      ],
+      borderables:[],
+      fontEditable:{get:()=>cfg.font_family||defaultConfig.font_family,set:v=>{cfg.font_family=v;window.elementSdk.setConfig({font_family:v})}},
+      fontSizeable:{get:()=>cfg.font_size||defaultConfig.font_size,set:v=>{cfg.font_size=v;window.elementSdk.setConfig({font_size:v})}}
+    }),
+    mapToEditPanelValues:(cfg)=>new Map([
+      ['hero_title',cfg.hero_title||defaultConfig.hero_title],
+      ['hero_description',cfg.hero_description||defaultConfig.hero_description],
+      ['footer_text',cfg.footer_text||defaultConfig.footer_text]
+    ])
+  });
+}
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ec3e69150d0dfe3',t:'MTc3NjE4MjE4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
