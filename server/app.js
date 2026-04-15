@@ -85,6 +85,21 @@ app.post('/api/upload-jawaban', upload.single('file'), async (req, res) => {
   }
 });
 
+app.use((err, req, res, next) => {
+  if (err.message === 'FORMAT_FILE_TIDAK_VALID') {
+    return res.status(400).json({
+      success: false,
+      message: 'File harus berupa gambar (jpg, jpeg, png)'
+    });
+  }
+
+  res.status(500).json({
+    success: false,
+    message: 'Terjadi kesalahan server'
+  });
+});
+
+
 // JALANKAN SERVER
 const PORT = process.env.PORT || 3000;
 
