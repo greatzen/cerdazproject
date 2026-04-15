@@ -5,7 +5,7 @@ const path = require('path');
 const app = express();
 
 // SERVE FRONTEND (INI PENTING BANGET)
-app.use(express.static(path.join(__dirname, '../client')));
+app.use(express.static(path.join(__dirname, 'client')));
 
 // SET STORAGE UPLOAD
 const storage = multer.diskStorage({
@@ -22,7 +22,7 @@ const upload = multer({ storage });
 
 // ROUTE TEST
 app.get('/', (req, res) => {
-  res.send('API is running 🚀');
+res.sendFile(path.join(__dirname, 'client/index.html'));
 });
 
 // ROUTE UPLOAD
