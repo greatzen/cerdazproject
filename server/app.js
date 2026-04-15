@@ -2,6 +2,12 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 const uploadPath = path.join(__dirname, 'storage/uploads');
@@ -25,7 +31,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({ dest: 'temp/' });
 
 // ROUTE TEST
 app.get('/', (req, res) => {
@@ -33,7 +39,7 @@ res.sendFile(path.join(__dirname, 'client/index.html'));
 });
 
 // ROUTE UPLOAD
-app.post('/api/upload-jawaban', upload.single('file'), (req, res) => {
+app.post('/api/upload-jawaban', upload.single('file'), async (req, res) => {
   const { nama, kelas } = req.body;
 
   if (!req.file) {
@@ -43,13 +49,29 @@ app.post('/api/upload-jawaban', upload.single('file'), (req, res) => {
     });
   }
 
-  console.log({
-    nama,
-    kelas,
-    file: req.file.filename
-  });
+  try {
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'cerdaz-uploads'
+    });
 
-  res.json({ success: true });
+    console.log({
+      nama,
+      kelas,
+      file_url: result.secure_url
+    });
+
+    res.json({
+      success: true,
+      url: result.secure_url
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: 'Upload gagal'
+    });
+  }
 });
 
 // JALANKAN SERVER
